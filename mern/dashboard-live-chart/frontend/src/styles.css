@@ -1,0 +1,13 @@
+.sidebar {
+    max-width: 20%;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 0%;
+}
+
+.sidebar-subitem-text-parent {
+    font-size: 1rem;
+}
+
+.sidebar-subitem-text-sub {
+    font-size: 0.8rem;
+}
