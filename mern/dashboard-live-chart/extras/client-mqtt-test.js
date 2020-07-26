@@ -17,14 +17,18 @@ client.on('connect', () => {
     if (!err) {
       
       /* Continuously send message with timestamp*/
+      setInterval(() => {
+        client.publish('topic/test1', (20 + Math.random()*60 - Math.random()*20).toString(), { qos:1 });
+      }, 1);
+
       /* setInterval(() => {
-        let d = new Date();
-        let dateString = d.toLocaleString()
-        client.publish('topic/test1', `Hello world!`);
-        dataCount++;
-        console.log(dataCount);
-      }, 1); */
-      
+        var payload = {
+          x: (20 + Math.random()*60).toString(),
+          y: (20 + Math.random()*60).toString(),
+          z: (20 + Math.random()*60).toString()
+        }
+        client.publish('topic/acceltest1', JSON.stringify(payload), {qos: 1});
+      }, 500); */
     }
   });
 });

@@ -1,8 +1,12 @@
 import React from 'react';
-import { Box, Grid, Container, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Container, Paper, Typography, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
-import LineChart from './LineChart'
 import 'fontsource-roboto';
+import LineChartRaw from './LineChartRaw';
+import LineChartRMS from './LineChartRMS';
+import ButtonControl from './ButtonControl';
+import NavigationData from './NavigationData';
+
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -11,7 +15,7 @@ const useStyles = makeStyles(() => ({
   },
   paperBig: {
     padding: 10,
-    height: 300,
+    height: 350,
     textAlign: 'center',
     borderRadius: 10,
   },
@@ -33,19 +37,44 @@ function Dashboard() {
             <Paper className={classes.paperBig} elevation={3} >
               <Typography variant='h5' gutterBottom>
                 <Box fontWeight={300} fontSize={26}>
-                  Chart 1
+                  Raw Data
                 </Box>
               </Typography>
-              <LineChart />
+              <Divider light style={{margin:10}}/>
+              <LineChartRaw />
             </Paper>
           </Grid>
           <Grid item xs={6}>
             <Paper className={classes.paperBig} elevation={3} >
               <Typography variant='h5' gutterBottom>
                 <Box fontWeight={300} fontSize={26}>
-                  Chart 2
+                  RMS Data
                 </Box>
               </Typography>
+              <Divider light style={{margin:10}}/>
+              <LineChartRMS />
+            </Paper>
+          </Grid>
+          <Grid item xs={6}>
+            <Paper className={classes.paperBig} elevation={3} >
+              <Typography variant='h5' gutterBottom>
+                <Box fontWeight={300} fontSize={26}>
+                  Button Control
+                </Box>
+              </Typography>
+              <Divider light style={{margin:10}}/>
+              <ButtonControl />
+            </Paper>
+          </Grid>
+          <Grid item xs={6}>
+            <Paper className={classes.paperBig} elevation={3} >
+              <Typography variant='h5' gutterBottom>
+                <Box fontWeight={300} fontSize={26}>
+                  Navigation Data
+                </Box>
+              </Typography>
+              <Divider light style={{margin:10}}/>
+              <NavigationData />
             </Paper>
           </Grid>
         </Grid>
