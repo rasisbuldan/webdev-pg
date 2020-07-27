@@ -19,7 +19,7 @@ client.on('connect', () => {
       /* Continuously send message with timestamp*/
       setInterval(() => {
         client.publish('topic/test1', (20 + Math.random()*60 - Math.random()*20).toString(), { qos:1 });
-      }, 1);
+      }, 100);
 
       /* setInterval(() => {
         var payload = {

@@ -5,7 +5,7 @@ import openSocket from 'socket.io-client';
 import 'fontsource-roboto';
 
 /* Icon */
-import Battery90RoundedIcon from '@material-ui/icons/Battery90Rounded';
+//import Battery90RoundedIcon from '@material-ui/icons/Battery90Rounded';
 
 /* Socket Connect */
 const socketHost = 'localhost';
@@ -43,7 +43,7 @@ class NavigationData extends React.Component {
 
   componentDidMount(){
     socket.on('navigationdata', (navdata) => {
-      this.setState({ navdata: navdata });
+      this.setState(navdata);
     });
   }
 
@@ -51,13 +51,50 @@ class NavigationData extends React.Component {
     return (
       <Container>
         <Grid container direction="row" alignItems="center">
-          <Grid item>
-            <Battery90RoundedIcon />
-          </Grid>
-          <Grid item>
+          <Grid container>
             <NavDataTypography variant='h5' gutterBottom>
               <Box fontWeight={300} fontSize={20}>
-                Battery Percentage: {this.state.navdata.batteryPercentage}
+                Battery Percentage: {Number(this.state.navdata.batteryPercentage).toFixed(2)}
+              </Box>
+            </NavDataTypography>
+          </Grid>
+          <Grid container>
+            <NavDataTypography variant='h5' gutterBottom>
+              <Box fontWeight={300} fontSize={20}>
+                Altitude: {Number(this.state.navdata.altitude).toFixed(2)}
+              </Box>
+            </NavDataTypography>
+          </Grid>
+          <Grid container>
+            <NavDataTypography variant='h5' gutterBottom>
+              <Box fontWeight={300} fontSize={20}>
+                Roll: {Number(this.state.navdata.orientation.roll).toFixed(4)}
+              </Box>
+            </NavDataTypography>
+          </Grid>
+          <Grid container>
+            <NavDataTypography variant='h5' gutterBottom>
+              <Box fontWeight={300} fontSize={20}>
+                Pitch: {Number(this.state.navdata.orientation.pitch).toFixed(4)}
+              </Box>
+            </NavDataTypography>
+          </Grid>
+          <Grid container>
+            <NavDataTypography variant='h5' gutterBottom>
+              <Box fontWeight={300} fontSize={20}>
+                Yaw: {Number(this.state.navdata.orientation.yaw).toFixed(4)}
+              </Box>
+            </NavDataTypography>
+          </Grid>
+          <Grid container>
+            <NavDataTypography variant='h5' gutterBottom>
+              <Box fontWeight={300} fontSize={20}>
+                PWM: [ 
+                  {Number(this.state.navdata.pwm.mot1)},
+                  {Number(this.state.navdata.pwm.mot2)},
+                  {Number(this.state.navdata.pwm.mot3)},
+                  {Number(this.state.navdata.pwm.mot4)}
+                 ]
               </Box>
             </NavDataTypography>
           </Grid>

@@ -75,12 +75,17 @@ class ButtonControl extends React.Component {
       case 'down':
         console.log('Going down!');
         break;
+      case 'takeoff':
+        console.log('Going takeoff!');
+        break;
+      case 'land':
+        console.log('Going land!');
+        break;
       default:
         console.log('Hover!');
         break;
     }
     socket.emit('motionData', action);
-    //axios.post(`http://${apiHost}:${apiPort}/controlaction`, { motion: this.state.motion });
     this.t = setTimeout(this.clickedAction, 50, action);
   }
 
@@ -100,10 +105,10 @@ class ButtonControl extends React.Component {
           </Button>
         </Container>
         <Container>
-          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('left')} size='large' style={{margin:30, minWidth: 80}}>
+          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('left')} size='large' style={{margin:10, minWidth: 80}}>
             LEFT
           </Button>
-          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('right')} size='large' style={{margin:30, minWidth: 80}}>
+          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('right')} size='large' style={{margin:10, minWidth: 80}}>
             RIGHT
           </Button>
         </Container>
@@ -114,11 +119,17 @@ class ButtonControl extends React.Component {
         </Container>
         <Divider light style={{margin:10}}/>
         <Container>
-          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('up')} size='large' style={{marginRight:20, minWidth: 80}}>
+          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('up')} size='large' style={{marginRight:10, minWidth: 80}}>
             UP
           </Button>
-          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('down')} size='large' style={{marginLeft:20, minWidth: 80}}>
+          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('down')} size='large' style={{marginLeft:10, marginRight:10, minWidth: 80}}>
             DOWN
+          </Button>
+          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('takeoff')} size='large' style={{marginLeft:10, marginRight:10, minWidth: 80}}>
+            TAKEOFF
+          </Button>
+          <Button variant="contained" color="primary" onMouseUp={this.onMouseUp} onMouseDown={() => this.onMouseDown('land')} size='large' style={{marginLeft:10, minWidth: 80}}>
+            LAND
           </Button>
         </Container>
       </Container>

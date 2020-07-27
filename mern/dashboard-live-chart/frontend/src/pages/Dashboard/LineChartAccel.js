@@ -17,21 +17,39 @@ const lineData = {
     {
       label: 'Raw data',
       fill: false,
-      lineTension: 0.1,
+      lineTension: 0,
       backgroundColor: '#3498db',
-      borderWidth: 1,
-      borderColor: '#3498db',
-      borderCapStyle: 'butt',
-      borderDash: [],
-      borderDashOffset: 1.0,
-      borderJoinStyle: 'miter',
-      pointBorderWidth: 0,
-      pointRadius: 0,
-      pointHitRadius: 10,
       data: [0],
     }
   ],
 };
+
+const datasets = [
+  {
+    label: 'X',
+    fill: false,
+    lineTension: 0,
+    borderColor: '#2196f3',
+    pointRadius: 0,
+    data: [0],
+  },
+  {
+    label: 'Y',
+    fill: false,
+    lineTension: 0,
+    borderColor: '#009688',
+    pointRadius: 0,
+    data: [0],
+  },
+  {
+    label: 'Z',
+    fill: false,
+    lineTension: 0,
+    borderColor: '#f44336',
+    pointRadius: 0,
+    data: [0],
+  }
+]
 
 const lineOptions = {
   animation: {
@@ -41,9 +59,9 @@ const lineOptions = {
     yAxes: [
       {
         ticks: {
-          min: 0,
-          max: 100,
-          stepSize: 20
+          min: -10,
+          max: 10,
+          stepSize: 2
         }
       },
     ],
@@ -59,17 +77,18 @@ class LineChartRaw extends React.Component {
 		var _this = this;
     
     /* Get data from socket */
-    socket.on('chartdata', (data) => {
-      var oldDataSet = _this.state.datasets[0];
-      var newDataSet = {
-        ...oldDataSet
-      };
+    socket.on(this.props.topic, (data) => {
+      //var oldDataSet = _this.state.datasets[0];
 
-      newDataSet.data = data;
+      var newDataSets = datasets;
 
+      newDataSets[0].data = data.x;
+      newDataSets[1].data = data.y;
+      newDataSets[2].data = data.z;
+      
       var newState = {
         ...lineData,
-        datasets: [newDataSet]
+        datasets: newDataSets
       };
 
       _this.setState(newState);
