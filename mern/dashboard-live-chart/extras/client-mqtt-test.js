@@ -18,7 +18,7 @@ client.on('connect', () => {
       
       /* Continuously send message with timestamp*/
       setInterval(() => {
-        client.publish('topic/test1', (20 + Math.random()*60 - Math.random()*20).toString(), { qos:1 });
+        client.publish('topic/test2', (20 + Math.random()*60 - Math.random()*20).toString(), { qos:1 });
       }, 100);
 
       /* setInterval(() => {
@@ -41,7 +41,7 @@ client.on('connect', () => {
 function sendRandomData(nData) {
   const startTime = new Date().getTime();
   for (let i = 0; i < nData; i++) {
-    client.publish('topic/test1', (Math.random()*10).toString(), { qos:1 });
+    client.publish('topic/test2', (Math.random()*10).toString(), { qos:1 });
     dataCount++;
   }
   const endTime = new Date().getTime();

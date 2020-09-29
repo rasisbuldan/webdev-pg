@@ -1,0 +1,17 @@
+.square1 {
+  background-color: #B2EBF2;
+  margin: 0;
+  width: 1vw;
+  padding: 0;
+  height: '1vw';
+  border: 2px solid black;
+}
+
+.square2 {
+  background-color: #FFFFFF;
+  margin: 0;
+  width: 1vw;
+  padding: 0;
+  height: '1vw';
+  border: 2px solid black;
+}

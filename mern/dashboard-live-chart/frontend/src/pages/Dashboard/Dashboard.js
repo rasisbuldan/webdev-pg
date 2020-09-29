@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Grid, Container, Paper, Typography, Divider } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core/styles';
 import 'fontsource-roboto';
 import LineChartRaw from './LineChartRaw';
 import LineChartAccel from './LineChartAccel';

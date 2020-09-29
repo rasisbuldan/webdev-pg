@@ -11,17 +11,17 @@ app.use(bodyParser.json());
 
 
 /* Express add-on */
-var whitelist = ['http://localhost:3000']
+var whitelist = ['http://localhost:3000', 'http://localhost']
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
+      callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'))
+      callback(new Error('Not allowed by CORS'));
     }
   }
 }
-app.use(cors(corsOptions));
+app.use(cors());
 
 
 /* Aedes broker */
@@ -47,7 +47,14 @@ aedes.on('clientDisconnect', (client) => {
 
 
 /* MQTT Initialization */
-var subscribeTopic = ['topic/test1', 'topic/acceltest1', 'topic/mpu6050', 'topic/pi/mpu6050', 'topic/navdataraw'];
+var subscribeTopic = [
+  'topic/test1',
+  'topic/test2',
+  'topic/acceltest1',
+  'topic/mpu6050',
+  'topic/pi/mpu6050',
+  'topic/navdataraw'
+];
 const mqttHost = 'localhost';
 const mqttPort = 1884;
 const mqtt = require('mqtt');
@@ -65,6 +72,9 @@ console.log(`[Socket] Socket listening on ${socketPort}`);
 const dbHost = 'localhost';
 const dbName = 'test-db';
 const mongoose = require('mongoose');
+require('mongoose-long')(mongoose);
+
+var SchemaTypes = mongoose.Schema.Types;
 
 mongoose.connect(`mongodb://${dbHost}/${dbName}`, {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
@@ -96,6 +106,31 @@ const accelDataSchema = new mongoose.Schema({
   versionKey: false
 });
 
+const combinedDataSchema = new mongoose.Schema({
+  description: {type: String},
+  timestamp: {type: Number},
+  pwm: {type: Number},
+  vib: {
+    x: {type: Number},
+    y: {type: Number},
+    z: {type: Number}
+  }
+});
+
+const flightDataSchema = new mongoose.Schema({
+  description: {type: String},
+  timestamp: {type: Number},
+  state: {
+    controlState: {type: String},
+    batteryPercentage: {type: String},
+    batteryMillivolt: {type: String}
+  },
+  pwm: {type: Array},
+  orientation: {type: Array},
+  mpu1: {type: Array},
+  mpu2: {type: Array}
+})
+
 const testMQTTSchema = new mongoose.Schema({
   timestamp: {type: String},
   topic: {type: String},
@@ -103,6 +138,19 @@ const testMQTTSchema = new mongoose.Schema({
 },
 {
   versionKey: false
+});
+
+const testMQTTTimeSchema = new mongoose.Schema({
+  timestamp: {type: String},
+  topic: {type: String},
+  message: {type: String}
+},
+{
+  versionKey: false,
+  timestamps: {
+    createdAt: true,
+    updatedAt: false
+  }
 });
 
 const navdataDroneSchema = new mongoose.Schema({
@@ -127,9 +175,51 @@ const navdataDroneSchema = new mongoose.Schema({
   versionKey: false
 });
 
+const navdataSchema = new mongoose.Schema({
+  description: {type: String},
+  timestart: {type: SchemaTypes.Long},
+  timestamp: {type: SchemaTypes.Long},
+  state: {
+    controlState: {type: String},
+    batteryPercentage: {type: Number},
+    batteryMillivolt: {type: Number}
+  },
+  navdata: {
+    altitude: {type: Number},
+    orientation: {
+      roll: {type: Number},
+      pitch: {type: Number},
+      yaw: {type: Number}
+    },
+    pwm: {
+      mot1: {type: Number},
+      mot2: {type: Number},
+      mot3: {type: Number},
+      mot4: {type: Number}
+    },
+    input: {
+      uroll: {type: Number},
+      upitch: {type: Number},
+      uyaw: {type: Number}
+    },
+    rawMeasures: {
+      accelerometers: {
+        x: {type: Number},
+        y: {type: Number},
+        z: {type: Number}
+      }
+    }
+  }
+})
+
 const AccelData = mongoose.model('AccelData', accelDataSchema);
+const CombinedData = mongoose.model('CombinedData', combinedDataSchema);
+const FlightData = mongoose.model('FlightData', flightDataSchema);
+const AccelDataStatic = mongoose.model('AccelDataStatic', accelDataSchema);
 const TestMQTT = mongoose.model('TestMQTT', testMQTTSchema);
+const TestMQTTTime = mongoose.model('TestMQTTTime', testMQTTTimeSchema);
 const NavdataDrone = mongoose.model('NavdataDrone', navdataDroneSchema);
+const Navdata = mongoose.model('Navdata', navdataSchema);
 
 /* AR-Drone Connector */
 var ardrone = require('ar-drone');
@@ -201,23 +291,178 @@ app.get('/testmsg', (req, res, next) => {
   res.json('Hello from Test API!');
 });
 
-app.get('/chartdata', (req, res, next) => {
-  res.json(dataBuffer);
-});
-
-app.get('/chartdataaccel', (req, res, next) => {
-  res.json(dataBufferAccel);
-});
-
-app.get('/chartdatarms', (req, res, next) => {
-  RMSData = RMSData.slice(-nDataBuffer);
-  res.json(RMSData);
-});
-
+/*** Dashboard ***/
 app.post('/controlaction', (req, res, next) => {
   console.log(req.body);
 });
 
+app.get('/getdesclist2', (req, res, next) => {
+  /* Query distinct description list, filtered with string equality */
+  FlightData.distinct('description', (err, descriptions) => {
+    /* Filter */
+    let descs = descriptions.filter((desc) => {
+      return desc !== '';
+    });
+
+    //console.log(descs);
+
+    let descObjList = [];
+
+    /* Convert to list of object */
+    for (let desc of descs) {
+      descObjList.push({
+        title: desc
+      });
+    }
+
+    /* Send response */
+    res.json({
+      descList: descObjList
+    });
+  });
+});
+
+app.get('/getdesclist', (req, res, next) => {
+  /* Query distinct description list, filtered with string equality */
+  CombinedData.distinct('description', (err, descriptions) => {
+    /* Filter */
+    let descs = descriptions.filter((desc) => {
+      return desc !== '';
+    });
+
+    //console.log(descs);
+
+    let descObjList = [];
+
+    /* Convert to list of object */
+    for (let desc of descs) {
+      descObjList.push({
+        title: desc
+      });
+    }
+
+    /* Send response */
+    res.json({
+      descList: descObjList
+    });
+  });
+});
+
+
+app.get('/navdataraw2', async (req, res) => {
+  let desc = req.query.desc;
+  console.log(`Getting desc: [${desc}]`);
+
+  let payloadArr = {
+    description: 'desc',
+    data: {
+      pwm: [0],
+      x: [0],
+      y: [0],
+      z: [0]
+    }
+  }
+
+  if (desc === '') {
+    res.json(payloadArr);
+    return;
+  }
+
+  let tsStart = 0;
+  let tsStop = 0;
+
+  // Find navdata documents by description
+  FlightData.find({
+    'description': desc
+  }, {'_id': 0}).sort({
+    'timestamp': 1
+  }).exec((err, combdatas) => {
+    tsStart = Number(combdatas[0].timestamp);
+    tsStop = Number(combdatas[combdatas.length-1].timestamp);
+
+    combdatas.forEach((doc) => {
+      payloadArr.data.pwm.push({
+        'x': Number(doc.timestamp),
+        'y': Number(doc.pwm[0])
+      });
+
+      payloadArr.data.x.push({
+        'x': Number(doc.timestamp),
+        'y': Number(doc.mpu1[0])
+      });
+
+      payloadArr.data.y.push({
+        'x': Number(doc.timestamp),
+        'y': Number(doc.mpu1[1])
+      });
+
+      payloadArr.data.z.push({
+        'x': Number(doc.timestamp),
+        'y': Number(doc.mpu1[2])
+      });
+    });
+
+    // Sending response
+    //console.log(`Sending response payload length: ${payload.timestamp.length}`);
+    //console.log(payload.description);
+    res.json(payloadArr);
+  });
+});
+
+app.get('/navdataraw', async (req, res) => {
+  let desc = req.query.desc;
+  console.log(`Getting desc: ${desc}`);
+
+  let payloadArr = {
+    description: 'desc',
+    data: {
+      pwm: [],
+      x: [],
+      y: [],
+      z: []
+    }
+  }
+
+  let tsStart = 0;
+  let tsStop = 0;
+
+  // Find navdata documents by description
+  CombinedData.find({
+    'description': desc
+  }, {'_id': 0}).sort({
+    'timestamp': 1
+  }).exec((err, combdatas) => {
+    tsStart = Number(combdatas[0].timestamp);
+    tsStop = Number(combdatas[combdatas.length-1].timestamp);
+
+    combdatas.forEach((doc) => {
+      payloadArr.data.pwm.push({
+        'x': Number(doc.timestamp),
+        'y': Number(doc.pwm)
+      });
+
+      payloadArr.data.x.push({
+        'x': Number(doc.timestamp),
+        'y': Number(doc.vib.x)
+      });
+
+      payloadArr.data.y.push({
+        'x': Number(doc.timestamp),
+        'y': Number(doc.vib.y)
+      });
+
+      payloadArr.data.z.push({
+        'x': Number(doc.timestamp),
+        'y': Number(doc.vib.z)
+      });
+    });
+
+    // Sending response
+    //console.log(`Sending response payload length: ${payload.timestamp.length}`);
+    //console.log(payload.description);
+    res.json(payloadArr);
+  });
+});
 
 /********** Socket **********/
 io.sockets.on('connection', (socket) => {
@@ -233,29 +478,26 @@ io.sockets.on('connection', (socket) => {
 });
 
 /* Live Raw Chart */
-setInterval(() => {
+/* setInterval(() => {
   io.sockets.emit('chartdata', dataBuffer);
-}, 10);
+}, 10); */
 
 /* Live Accel1 Chart */
-setInterval(() => {
+/* setInterval(() => {
   io.sockets.emit('acceldata1', dataBufferAccel.mpu1);
-}, 10);
+}, 10); */
 
 /* Live Accel1 Chart */
-setInterval(() => {
+/* setInterval(() => {
   io.sockets.emit('acceldata2', dataBufferAccel.mpu2);
-}, 10);
+}, 10); */
 
 /* Live RMS Chart */
-setInterval(() => {
+/* setInterval(() => {
   RMSData = RMSData.slice(-nDataBuffer);
   io.sockets.emit('chartdatarms', RMSData);
-}, 10);
+}, 10); */
 
-/* setInterval(() => {
-  console.log(`${dataBufferAccel.mpu1.x.length}, ${dataBufferAccel.mpu1.y.length}, ${dataBufferAccel.mpu1.z.length}`)
-},1000); */
 
 
 /********** MQTT **********/
@@ -312,7 +554,7 @@ mqttClient.on('message', (topic, message) => {
     var msgData = JSON.parse(message.toString());
     
     /* Insest to dataBuffer */
-    dataBufferAccel.mpu1.x.push(msgData.mpu1.x);
+    /* dataBufferAccel.mpu1.x.push(msgData.mpu1.x);
     dataBufferAccel.mpu1.y.push(msgData.mpu1.y);
     dataBufferAccel.mpu1.z.push(msgData.mpu1.z);
     dataBufferAccel.mpu2.x.push(msgData.mpu2.x);
@@ -326,7 +568,7 @@ mqttClient.on('message', (topic, message) => {
       dataBufferAccel.mpu2.x.shift();
       dataBufferAccel.mpu2.y.shift();
       dataBufferAccel.mpu2.z.shift();
-    }
+    } */
 
     /* Insert to DB */
     AccelData.create({
@@ -348,7 +590,6 @@ mqttClient.on('message', (topic, message) => {
   else if (topic == 'topic/mpu6050') {
     var msgData = JSON.parse(message.toString());
     nAccel++;
-    console.log(nAccel);
     let num = Number(msgData.mpu1.x);
     accelBuffer.push(num);
     if (accelBuffer.length > nDataBuffer) {
@@ -398,6 +639,13 @@ mqttClient.on('message', (topic, message) => {
       navdata: payload.navdata
     });
   }
+
+  /* MPU6050 Static */
+  else if (topic == 'topic/static/mpu6050') {
+    let mpudata = JSON.parse(message.toString());
+
+  }
+
 });
 
 

@@ -61,12 +61,16 @@ class LineChartRaw extends React.Component {
     /* Get data from socket */
     socket.on('chartdata', (data) => {
       var oldDataSet = _this.state.datasets[0];
+
+      // Copy dataset
       var newDataSet = {
         ...oldDataSet
       };
 
+      // Set new data
       newDataSet.data = data;
 
+      
       var newState = {
         ...lineData,
         datasets: [newDataSet]

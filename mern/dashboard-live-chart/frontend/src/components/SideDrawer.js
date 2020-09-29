@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Drawer, Button, List, Divider, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { grey } from '@material-ui/core/colors';
+// eslint-disable-next-line
 import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
 
 const useStyles = makeStyles({
@@ -40,8 +41,8 @@ function TemporaryDrawer() {
     >
       <List>
         {
-          ['Home', 'Dashboard', 'About'].map((text, index) => (
-            <ListItem button component={Link} key={text} to={"/" + text.toLowerCase()}>
+          ['Home', 'Dashboard', 'Data Browser', 'About'].map((text, index) => (
+            <ListItem button component={Link} key={text} to={"/" + text.replace(/ /g, "").toLowerCase()}>
               <ListItemText primary={text} />
             </ListItem>
           ))
@@ -67,5 +68,9 @@ function TemporaryDrawer() {
     </div>
   )
 }
+
+/*  <Button onClick={toggleDrawer('active', true)}>
+      <MenuRoundedIcon />
+    </Button> */
 
 export default TemporaryDrawer;
