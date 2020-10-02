@@ -1,7 +1,6 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import Board from './Board';
+import Board from './board/Board';
 
 function App() {
   return (
